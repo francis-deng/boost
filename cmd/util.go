@@ -16,6 +16,7 @@ import (
 
 func resolveMinerMultiaddr(cctx *cli.Context) (*peer.AddrInfo, bool){
 	if !cctx.IsSet("miner-p2p-address") {
+		log.Info("found no miner-p2p-address")
 		return nil,false
 	}
 
@@ -23,15 +24,18 @@ func resolveMinerMultiaddr(cctx *cli.Context) (*peer.AddrInfo, bool){
 	re := regexp.MustCompile("(.+)/p2p/(.+)")
 
 	idAndMa := re.FindStringSubmatch(mP2pAddrStr)
-	id,err := peer.IDFromString(idAndMa[1])
+	id0 := idAndMa[1]
+	ma0 := idAndMa[2]
+
+	id,err := peer.Decode(id0)
 	if err != nil {
-		log.Warnf("new id: found a %v, using %s", err, mP2pAddrStr)
+		log.Warnf("new id: found a %v, while passing %s,%s", err, id0, mP2pAddrStr)
 		return nil,false
 	}
 
-	ma,err := multiaddr.NewMultiaddr(idAndMa[2])
+	ma,err := multiaddr.NewMultiaddr(ma0)
 	if err != nil {
-		log.Warnf("new multiaddr: found a %v, pass %s", err, mP2pAddrStr)
+		log.Warnf("new multiaddr: found a %v, while passing %s,%s", err, ma0, mP2pAddrStr)
 		return nil,false
 	}
 
