@@ -34,6 +34,11 @@ var dealFlags = []cli.Flag{
 		Required: true,
 	},
 	&cli.StringFlag{
+		Name:     "miner-p2p-address",
+		Usage:    "listening p2p address of the miner",
+		Required: false,
+	},
+	&cli.StringFlag{
 		Name:     "commp",
 		Usage:    "commp of the CAR file",
 		Required: true,
@@ -138,12 +143,23 @@ func dealCmdAction(cctx *cli.Context, isOnline bool) error {
 		return err
 	}
 
+	// updated by Francis
+	// flag:
+	// --miner-p2p-address=/ip4/10.7.3.36/tcp/41133/p2p/12D3KooWGaqcbszZ5MtupSdHF2LSnqqASKwptpUnZZDMACYVkG4k
+	/*
 	addrInfo, err := cmd.GetAddrInfo(ctx, api, maddr)
 	if err != nil {
 		return err
 	}
 
 	log.Debugw("found storage provider", "id", addrInfo.ID, "multiaddrs", addrInfo.Addrs, "addr", maddr)
+	 */
+	addrInfo, err := cmd.GetMinerAddrInfo(cctx, ctx, api)
+	if err != nil {
+		return err
+	}
+
+	log.Debugw("found storage provider", "id", addrInfo.ID, "multiaddrs", addrInfo.Addrs)
 
 	if err := n.Host.Connect(ctx, *addrInfo); err != nil {
 		return fmt.Errorf("failed to connect to peer %s: %w", addrInfo.ID, err)

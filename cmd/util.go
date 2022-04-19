@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/urfave/cli/v2"
+	"regexp"
 
 	"github.com/filecoin-project/go-address"
 	"github.com/filecoin-project/lotus/api"
@@ -11,6 +13,48 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
 )
+
+func resolveMinerMultiaddr(cctx *cli.Context) (*peer.AddrInfo, bool){
+	if !cctx.IsSet("miner-p2p-address") {
+		return nil,false
+	}
+
+	mP2pAddrStr := cctx.String("miner-p2p-address")
+	re := regexp.MustCompile("(.+)/p2p/(.+)")
+
+	idAndMa := re.FindStringSubmatch(mP2pAddrStr)
+	id,err := peer.IDFromString(idAndMa[1])
+	if err != nil {
+		return nil,false
+	}
+
+	ma,err := multiaddr.NewMultiaddr(idAndMa[2])
+	if err != nil {
+		return nil,false
+	}
+
+	var maddrs []multiaddr.Multiaddr
+	maddrs = append(maddrs, ma)
+
+	return &peer.AddrInfo{
+		ID:    id,
+		Addrs: maddrs,
+	}, true
+}
+
+func GetMinerAddrInfo(cctx *cli.Context, ctx context.Context, api api.Gateway) (*peer.AddrInfo, error) {
+	pa,worked := resolveMinerMultiaddr(cctx)
+	if worked {
+		return pa, nil
+	}
+
+	maddr, err := address.NewFromString(cctx.String("provider"))
+	if err != nil {
+		return nil, err
+	}
+
+	return GetAddrInfo(ctx,api,maddr)
+}
 
 func GetAddrInfo(ctx context.Context, api api.Gateway, maddr address.Address) (*peer.AddrInfo, error) {
 	minfo, err := api.StateMinerInfo(ctx, maddr, types.EmptyTSK)
