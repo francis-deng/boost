@@ -1,6 +1,9 @@
 package cmd
 
-import "github.com/urfave/cli/v2"
+import (
+	logging "github.com/ipfs/go-log/v2"
+	"github.com/urfave/cli/v2"
+)
 
 var FlagRepo = &cli.StringFlag{
 	Name:  "repo",
@@ -13,3 +16,6 @@ var FlagJson = &cli.BoolFlag{
 	Usage: "output results in json format",
 	Value: false,
 }
+
+
+var log = logging.Logger("cmd")

@@ -25,11 +25,13 @@ func resolveMinerMultiaddr(cctx *cli.Context) (*peer.AddrInfo, bool){
 	idAndMa := re.FindStringSubmatch(mP2pAddrStr)
 	id,err := peer.IDFromString(idAndMa[1])
 	if err != nil {
+		log.Warnf("new id: found a %v, using %s", err, mP2pAddrStr)
 		return nil,false
 	}
 
 	ma,err := multiaddr.NewMultiaddr(idAndMa[2])
 	if err != nil {
+		log.Warnf("new multiaddr: found a %v, pass %s", err, mP2pAddrStr)
 		return nil,false
 	}
 
