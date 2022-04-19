@@ -23,19 +23,19 @@ func resolveMinerMultiaddr(cctx *cli.Context) (*peer.AddrInfo, bool){
 	mP2pAddrStr := cctx.String("miner-p2p-address")
 	re := regexp.MustCompile("(.+)/p2p/(.+)")
 
-	idAndMa := re.FindStringSubmatch(mP2pAddrStr)
-	id0 := idAndMa[1]
-	ma0 := idAndMa[2]
+	maAndId := re.FindStringSubmatch(mP2pAddrStr)
+	id0 := maAndId[2]
+	ma0 := maAndId[1]
 
 	id,err := peer.Decode(id0)
 	if err != nil {
-		log.Warnf("new id: found a %v, while passing %s,%s", err, id0, mP2pAddrStr)
+		log.Warnf("new id: found a %v, during that call %s", err, id0)
 		return nil,false
 	}
 
 	ma,err := multiaddr.NewMultiaddr(ma0)
 	if err != nil {
-		log.Warnf("new multiaddr: found a %v, while passing %s,%s", err, ma0, mP2pAddrStr)
+		log.Warnf("new multiaddr: found a %v, during that call %s", err, ma0)
 		return nil,false
 	}
 
